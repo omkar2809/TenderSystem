@@ -12,20 +12,19 @@ router.use(bodyParser.json());
 router.options('*', cors.corsWithOptions, (req, res) => {
   res.sendStatus(200);
 })
-router.get("/", cors.corsWithOptions, (req, res, next) => {
+router.get("/", cors.corsWithOptions, (req, res) => {
   User.find({})
     .then(
       users => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json(users);
-      },
-      err => next(err)
+      }
     )
-    .catch(err => next(err));
+    .catch(err => res.status(500).json({error: 'Something went wrong, please try again!'}));
 });
 
-router.post("/signup", cors.corsWithOptions,  (req, res, next) => {
+router.post("/signup", cors.corsWithOptions,  (req, res) => {
   User.findOne({email: req.body.email})
   .then(user => {
     if(!user){
@@ -51,6 +50,11 @@ router.post("/signup", cors.corsWithOptions,  (req, res, next) => {
               res.json({ err: err });
               return;
             }
+
+            // ============Blockchain func >>> mainBlockchainUser ==========
+
+            // =============================================================
+            
             passport.authenticate("local")(req, res, () => {
               res.statusCode = 200;
               res.setHeader("Content-Type", "application/json");
@@ -61,13 +65,13 @@ router.post("/signup", cors.corsWithOptions,  (req, res, next) => {
       });
     }
     else {
-      throw new Error('Email Already Exist');
+      res.status(400).json({error : 'Email is already in use'});
     }
   })
   .catch(err => {
     res.statusCode = 500;
     res.setHeader("Content-Type", "application/json");
-    res.json({ err: {message:'Email Already Exist'} });
+    res.json({ error: 'Something went wrong, please try again!' });
     return;
   })
 });
@@ -75,7 +79,7 @@ router.post("/signup", cors.corsWithOptions,  (req, res, next) => {
 router.post("/login", cors.corsWithOptions, (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if(err) 
-      return next(err);
+      res.status(401).json({error: err});
     if(!user) {
       res.statusCode = 401;
       res.setHeader("Content-Type", "application/json");
@@ -95,7 +99,7 @@ router.post("/login", cors.corsWithOptions, (req, res, next) => {
   }) (req,res, next);
 });
 
-router.get("/logout", cors.corsWithOptions, (req, res, next) => {
+router.get("/logout", cors.corsWithOptions, (req, res) => {
   if (req.session) {
     req.session.destroy();
     res.clearCookie("session-id");
@@ -106,18 +110,18 @@ router.get("/logout", cors.corsWithOptions, (req, res, next) => {
   }
 });
 
-router.get('/myProfile', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+router.get('/myProfile', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
   console.log(req.user);
   User.findById(req.user._id)
   .then((user) => {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.json(user);
-  }, (err) => next(err))
-  .catch((err) => next(err));
+  })
+  .catch((err) => res.status(403).json({error: 'User Not Found'}));
 })
 
-router.put('/editProfile', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+router.put('/editProfile', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
   User.findByIdAndUpdate(req.user._id, {
     $set: req.body
   }, {new: true})
@@ -125,21 +129,21 @@ router.put('/editProfile', cors.corsWithOptions, authenticate.verifyUser, (req, 
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.json(user);
-  }, (err) => next(err))
-  .catch((err) => next(err));
+  })
+  .catch((err) => res.status(403).json({error: 'User Not Found'}));
 })
 
-router.get('/:userId', cors.corsWithOptions, (req, res, next) => {
+router.get('/:userId', cors.corsWithOptions, (req, res) => {
   User.findById(req.params.userId)
     .then(user => {
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
       res.json(user);
     })
-    .catch(err => next(err))
+    .catch(err => res.status(403).json({error: 'User Not Found'}))
 })
 
-router.post('/licenses', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+router.post('/licenses', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
   User.findById(req.user._id)
     .then((user) => {
         if (user != null) {
@@ -149,14 +153,19 @@ router.post('/licenses', cors.corsWithOptions, authenticate.verifyUser, (req, re
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
                 res.json(user); 
-            }, (err) => next(err));       
+            })   
         }
-        else throw new Error('Error!! Try Again');
-    }, (err) => next(err))
-    .catch((err) => next(err));
+        else {
+          res.status(403).json({error: 'User Not Found'})
+        }
+      })
+      .catch(err =>  {
+        console.log(err);
+        res.status(403).json({error: 'Something went Wrong!!'})
+      })
 })
 
-router.post('/experience', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+router.post('/experience', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
   User.findById(req.user._id)
     .then((user) => {
         if (user != null) {
@@ -166,14 +175,19 @@ router.post('/experience', cors.corsWithOptions, authenticate.verifyUser, (req, 
               res.statusCode = 200;
               res.setHeader('Content-Type', 'application/json');
               res.json(user); 
-            }, (err) => next(err));
+            });
         }
-        else throw new Error('Error!! Try Again');
-    }, (err) => next(err))
-    .catch((err) => next(err));
+        else {
+          res.status(403).json({error: 'User Not Found'})
+        }
+      })
+      .catch(err =>  {
+        console.log(err);
+        res.status(403).json({error: 'Something went Wrong!!'})
+      })
 })
 
-router.put('/licenses/:licenseId', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+router.put('/licenses/:licenseId', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
   User.findById(req.user._id)
     .then(user => {
       const licenses = user.licenses.id(req.params.licenseId);
@@ -200,14 +214,17 @@ router.put('/licenses/:licenseId', cors.corsWithOptions, authenticate.verifyUser
             res.json(user); 
           })
       } else {
-        throw new Error('License Not Found');
+        res.status(403).json({error: 'Work Experience Not Found'})
       }
     })
-    .catch(err => next(err))
+    .catch(err =>  {
+      console.log(err);
+      res.status(403).json({error: 'Something went Wrong!!'})
+    })
 })
 
 
-router.put('experience/:expId', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+router.put('experience/:expId', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
   User.findById(req.user._id)
     .then(user => {
       const exp = user.workExperience.id(req.params.expId);
@@ -228,13 +245,16 @@ router.put('experience/:expId', cors.corsWithOptions, authenticate.verifyUser, (
             res.json(user); 
           })
       } else {
-        throw new Error('Work Experience Not Found');
+        res.status(403).json({error: 'Work Experience Not Found'})
       }
     })
-    .catch(err => next(err))
+    .catch(err =>  {
+      console.log(err);
+      res.status(403).json({error: 'Something went Wrong!!'})
+    })
 })
 
-router.delete('/licenses/:licenseId', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+router.delete('/licenses/:licenseId', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
   User.findById(req.user._id)
     .then(user => {
       const licenses = user.licenses.id(req.params.licenseId);
@@ -248,13 +268,16 @@ router.delete('/licenses/:licenseId', cors.corsWithOptions, authenticate.verifyU
           })
       }
       else {
-        throw new Error('License Not Found');
+        res.status(403).json({error: 'License Not Found'})
       }
     })
-    .catch(err => next(err))
+    .catch(err =>  {
+      console.log(err);
+      res.status(403).json({error: 'Something went Wrong!!'})
+    })
 })
 
-router.delete('experience/:expId', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+router.delete('experience/:expId', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
   User.findById(req.user._id)
     .then(user => {
       const exp = user.workExperience.id(req.params.expId);
@@ -268,10 +291,13 @@ router.delete('experience/:expId', cors.corsWithOptions, authenticate.verifyUser
           })
       }
       else {
-        throw new Error('License Not Found');
+        res.status(403).json({error: 'License Not Found'})
       }
     })
-    .catch(err => next(err))
+    .catch(err =>  {
+      console.log(err);
+      res.status(403).json({error: 'Something went Wrong!!'})
+    })
 })
 
 module.exports = router;
