@@ -1,0 +1,256 @@
+name: "Basic"
+x-type: "hlfv1"
+description: "Basic network"
+version: "1.0"
+channels:
+  basicchannel:
+    orderers:
+      - orderer.tendersys.com
+
+    peers:
+      peer0.bidder.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer1.bidder.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer0.gov.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer1.gov.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer2.gov.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer3.gov.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer0.bank.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+    chaincodes:
+      - mycc:v0
+
+  bidchannel:
+    orderers:
+      - orderer.tendersys.com
+
+    peers:
+      peer0.bidder.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer1.bidder.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer0.gov.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer1.gov.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer2.gov.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer3.gov.tendersys.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+    chaincodes:
+      - mycc:v0
+
+organizations:
+  Bidder:
+    mspid: BidderMSP
+
+    peers:
+      - peer0.bidder.tendersys.com
+      - peer1.bidder.tendersys.com
+
+    certificateAuthorities:
+      - ca.bidder.tendersys.com
+
+    adminPrivateKey:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/bidder.tendersys.com/users/Admin@bidder.tendersys.com/msp/keystore/priv_sk
+    signedCert:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/bidder.tendersys.com/users/Admin@bidder.tendersys.com/msp/signcerts/Admin@bidder.tendersys.com-cert.pem
+
+  Gov:
+    mspid: GovMSP
+
+    peers:
+      - peer0.gov.tendersys.com
+      - peer1.gov.tendersys.com
+      - peer2.gov.tendersys.com
+      - peer3.gov.tendersys.com
+
+    certificateAuthorities:
+      - ca.gov.tendersys.com
+
+    adminPrivateKey:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/gov.tendersys.com/users/Admin@gov.tendersys.com/msp/keystore/priv_sk
+    signedCert:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/gov.tendersys.com/users/Admin@gov.tendersys.com/msp/signcerts/Admin@gov.tendersys.com-cert.pem
+
+  Bank:
+      mspid: BankMSP
+
+      peers:
+        - peer0.bank.tendersys.com
+
+      certificateAuthorities:
+        - ca.bank.tendersys.com
+
+      adminPrivateKey:
+        path: ../artifacts/channel/crypto-config/peerOrganizations/bank.tendersys.com/users/Admin@bank.tendersys.com/msp/keystore/priv_sk
+      signedCert:
+        path: ../artifacts/channel/crypto-config/peerOrganizations/bank.tendersys.com/users/Admin@bank.tendersys.com/msp/signcerts/Admin@bank.tendersys.com-cert.pem
+
+orderers:
+  orderer.tendersys.com:
+    url: grpcs://localhost:7050
+    grpcOptions:
+      ssl-target-name-override: orderer.tendersys.com
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/ordererOrganizations/tendersys.com/orderers/orderer.tendersys.com/tls/ca.crt
+
+
+#
+# List of peers to send various requests to, including endorsement, query
+# and event listener registration.
+#
+peers:
+  peer0.bidder.tendersys.com:
+    url: grpcs://localhost:7051
+
+    grpcOptions:
+      ssl-target-name-override: peer0.bidder.tendersys.com
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/bidder.tendersys.com/peers/peer0.bidder.tendersys.com/tls/ca.crt
+
+  peer1.bidder.tendersys.com:
+    url: grpcs://localhost:8051
+
+    grpcOptions:
+      ssl-target-name-override: peer1.bidder.tendersys.com
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/bidder.tendersys.com/peers/peer1.bidder.tendersys.com/tls/ca.crt
+
+  peer0.gov.tendersys.com:
+    url: grpcs://localhost:9051
+
+    grpcOptions:
+      ssl-target-name-override: peer0.gov.tendersys.com
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/gov.tendersys.com/peers/peer0.gov.tendersys.com/tls/ca.crt
+
+  peer1.gov.tendersys.com:
+    url: grpcs://localhost:10051
+
+    grpcOptions:
+      ssl-target-name-override: peer1.gov.tendersys.com
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/gov.tendersys.com/peers/peer1.gov.tendersys.com/tls/ca.crt
+  
+  peer2.gov.tendersys.com:
+    url: grpcs://localhost:11051
+
+    grpcOptions:
+      ssl-target-name-override: peer2.gov.tendersys.com
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/gov.tendersys.com/peers/peer2.gov.tendersys.com/tls/ca.crt
+
+  peer3.gov.tendersys.com:
+    url: grpcs://localhost:12051
+
+    grpcOptions:
+      ssl-target-name-override: peer3.gov.tendersys.com
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/gov.tendersys.com/peers/peer3.gov.tendersys.com/tls/ca.crt
+
+  peer0.bank.tendersys.com:
+    url: grpcs://localhost:13051
+
+    grpcOptions:
+      ssl-target-name-override: peer0.bank.tendersys.com
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/bank.tendersys.com/peers/peer0.bank.tendersys.com/tls/ca.crt
+#
+# Fabric-CA is a special kind of Certificate Authority provided by Hyperledger Fabric which allows
+# certificate management to be done via REST APIs. Application may choose to use a standard
+# Certificate Authority instead of Fabric-CA, in which case this section would not be specified.
+#
+certificateAuthorities:
+  ca.bidder.tendersys.com:
+    url: https://localhost:7054
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/bidder.tendersys.com/ca/ca.bidder.tendersys.com-cert.pem
+
+    registrar:
+      - enrollId: admin
+        enrollSecret: adminpw
+    caName: ca.bidder.tendersys.com
+
+  ca.gov.tendersys.com:
+    url: https://localhost:8054
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/gov.tendersys.com/ca/ca.gov.tendersys.com-cert.pem
+
+    registrar:
+      - enrollId: admin
+        enrollSecret: adminpw
+    caName: ca.gov.tendersys.com
+
+  ca.bank.tendersys.com:
+    url: https://localhost:9054
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: ../artifacts/channel/crypto-config/peerOrganizations/bank.tendersys.com/ca/ca.bank.tendersys.com-cert.pem
+
+    registrar:
+      - enrollId: admin
+        enrollSecret: adminpw
+    caName: ca.bank.tendersys.com
