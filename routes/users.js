@@ -100,11 +100,9 @@ router.get("/logout", cors.corsWithOptions, (req, res, next) => {
     req.session.destroy();
     res.clearCookie("session-id");
     res.setHeader("Content-Type", "application/json");
-        res.json({ success: true, status: "logout successful!"});
+    res.json({ success: true, status: "logout successful!"});
   } else {
-    var err = new Error("You are not logged in!");
-    err.status = 403;
-    next(err);
+    return res.status(403).json({error: 'You are not logged in!'});
   }
 });
 
@@ -148,13 +146,10 @@ router.post('/licenses', cors.corsWithOptions, authenticate.verifyUser, (req, re
             user.licenses = user.licenses.concat(req.body);
             user.save()
             .then((user) => {
-                User.findById(user._id)
-                    .then((user) => {
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.json(user); 
-                    });       
-            }, (err) => next(err));
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(user); 
+            }, (err) => next(err));       
         }
         else throw new Error('Error!! Try Again');
     }, (err) => next(err))
@@ -168,12 +163,9 @@ router.post('/experience', cors.corsWithOptions, authenticate.verifyUser, (req, 
           user.workExperience = user.workExperience.concat(req.body);
             user.save()
             .then((user) => {
-                User.findById(user._id)
-                    .then((user) => {
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.json(user); 
-                    });       
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/json');
+              res.json(user); 
             }, (err) => next(err));
         }
         else throw new Error('Error!! Try Again');
@@ -181,10 +173,105 @@ router.post('/experience', cors.corsWithOptions, authenticate.verifyUser, (req, 
     .catch((err) => next(err));
 })
 
-// TODO List
-// router.put('/licenses/:licenseId')
-// router.put('experience/:expId')
-// router.delete('/licenses/:licenseId')
-// router.delete('experience/:expId')
+router.put('/licenses/:licenseId', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+  User.findById(req.user._id)
+    .then(user => {
+      const licenses = user.licenses.id(req.params.licenseId);
+      if(licenses) {
+        if(req.body.title) {
+          licenses.title = req.body.title;
+        }
+        if(req.body.issuedBy) {
+          licenses.issuedBy = req.body.issuedBy;
+        }
+        if(req.body.issuedDate) {
+          licenses.issuedDate = req.body.issuedDate;
+        }
+        if(req.body.expiryDate) {
+          licenses.expiryDate = req.body.expiryDate;
+        }
+        if(req.body.url) {
+          licenses.url = req.body.url;
+        }
+        user.save()
+          .then(user => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(user); 
+          })
+      } else {
+        throw new Error('License Not Found');
+      }
+    })
+    .catch(err => next(err))
+})
+
+
+router.put('experience/:expId', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+  User.findById(req.user._id)
+    .then(user => {
+      const exp = user.workExperience.id(req.params.expId);
+      if(exp) {
+        if(req.body.title) {
+          exp.title = req.body.title;
+        }
+        if(req.body.description) {
+          exp.description = req.body.description;
+        }
+        if(req.body.period) {
+          exp.period = req.body.period;
+        }
+        user.save()
+          .then(user => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(user); 
+          })
+      } else {
+        throw new Error('Work Experience Not Found');
+      }
+    })
+    .catch(err => next(err))
+})
+
+router.delete('/licenses/:licenseId', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+  User.findById(req.user._id)
+    .then(user => {
+      const licenses = user.licenses.id(req.params.licenseId);
+      if(licenses) {
+        licenses.remove();
+        user.save()
+          .then(user => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(user); 
+          })
+      }
+      else {
+        throw new Error('License Not Found');
+      }
+    })
+    .catch(err => next(err))
+})
+
+router.delete('experience/:expId', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+  User.findById(req.user._id)
+    .then(user => {
+      const exp = user.workExperience.id(req.params.expId);
+      if(exp) {
+        exp.remove();
+        user.save()
+          .then(user => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json(user); 
+          })
+      }
+      else {
+        throw new Error('License Not Found');
+      }
+    })
+    .catch(err => next(err))
+})
 
 module.exports = router;
