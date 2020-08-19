@@ -5,7 +5,7 @@ var ExtractJwt = require('passport-jwt').ExtractJwt;
 var jwt = require('jsonwebtoken');
 
 var User = require('../models/user');
-// var Tender = require('../models/tender');
+
 var config = require('./config');
 
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
@@ -70,41 +70,3 @@ exports.verifyBidder = (req, res, next) => {
         return next(err);
     }
 };
-
-// exports.verifyTenderAccessForGov = (req, res, next) => {
-//     Tender.findById(req.body.tenderId)
-//         .then(tender => {
-//             if(tender && tender.host === req.user) {
-//                 return next();
-//             }
-//             else {
-//                 err = new Error("You are not authorized to perform this operation!");
-//                 err.status = 403;
-//                 return next(err);
-//             }
-//         })
-//         .catch(err => {
-//             err = new Error("Error!!!");
-//             err.status = 403;
-//             return next(err);
-//         })
-// }
-
-// exports.verifyTenderAccessForBidder = (req, res, next) => {
-//     Tender.findById(req.body.tenderId)
-//         .then(tender => {
-//             if(tender && tender.winnerBidder === req.user) {
-//                 return next();
-//             }
-//             else {
-//                 err = new Error("You are not authorized to perform this operation!");
-//                 err.status = 403;
-//                 return next(err);
-//             }
-//         })
-//         .catch(err => {
-//             err = new Error("Error!!!");
-//             err.status = 403;
-//             return next(err);
-//         })
-// }

@@ -34,7 +34,7 @@ router.post("/signup", cors.corsWithOptions,  (req, res) => {
           res.setHeader("Content-Type", "application/json");
           res.json({ err: err });
         } else {
-          // =============add filed =============
+          // =============add fields =============
 
           if(req.body.orgName) user.orgName = req.body.orgName;
           if(req.body.orgDescription) user.orgDescription = req.body.orgDescription;
@@ -51,7 +51,7 @@ router.post("/signup", cors.corsWithOptions,  (req, res) => {
               return;
             }
 
-            // ============Blockchain func >>> mainBlockchainUser ==========
+            // ============ Blockchain func >>> mainBlockchainUser ==========
 
             // =============================================================
             
@@ -222,7 +222,6 @@ router.put('/licenses/:licenseId', cors.corsWithOptions, authenticate.verifyUser
       res.status(403).json({error: 'Something went Wrong!!'})
     })
 })
-
 
 router.put('experience/:expId', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
   User.findById(req.user._id)
