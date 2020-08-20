@@ -44,7 +44,7 @@ const tenderSchema = new Schema({
     }],
     // appliedBidders: [ AppliedBidderSchema ],
     winnerBidder: { 
-        type: mongoose.Schema.type.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'AppliedBidder'
     },
     // reports: [ ReportSchema ]

@@ -1,5 +1,5 @@
 const express = require('express');
-const tenderRouter = express.tenderRouter();
+const tenderRouter = express.Router();
 const bodyParser = require("body-parser");
 const Tender = require("../models/tender");
 const AppliedBidder = require('../models/appliedBidder');
@@ -16,11 +16,30 @@ tenderRouter.options('*', cors.corsWithOptions, (req, res) => {
 // query all tender
 tenderRouter.get("/", cors.corsWithOptions, (req, res) => {
     // ================== Blockchain func >>>> mainQueryChaincode ================
+    // var payload = {
+    //     chaincodeName: 'tendersys',
+    //     channelName: 'bidchannel',
+    //     args: ['TEBDER0'],
+    //     peers: ['perr0.gov.tendersys.com'],
+    //     fcn: 'queryAllTender'
+    // };
+    // blockchain.mainQueryChaincode(payload)
+    // .then(blockchain_res => {
+    //     if(blockchain_res.success) {
+    //         res.statusCode = 200;
+    //         res.setHeader("Content-Type", "application/json");
+    //         res.json(blockchain_res);
+    //     }
+    //     else {
+    //         res.status(500).json(blockchain_res);
+    //     }
+    // })
+    // .catch(err => res.status(500).json({error: 'Something went wrong! please try again'}));
 
     // ===========================================================================
 
     // ======================= For Testing ======================================= 
-    Tender.find({})
+    Tender.find({}).populate('host')
         .then(
             tender => {
             res.statusCode = 200;
@@ -35,19 +54,48 @@ tenderRouter.get("/", cors.corsWithOptions, (req, res) => {
 // query tender
 tenderRouter.get('/:tenderId', cors.corsWithOptions, (req, res) => {
     // ================== Blockchain func >>>> mainQueryChaincode ================
-
-    // ===========================================================================
-
-    // ======================= For Testing ======================================= 
-    Tender.findById(req.params.tenderId)
+    Tender.findById(req.params.tenderId).populate('host').populate('winnerBidder')
         .then(
             tender => {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json");
-            res.json(tender);
+                if(tender) {
+                    // var payload = {
+                    //     chaincodeName: 'tendersys',
+                    //     channelName: 'bidchannel',
+                    //     args: [tender.tenderKey],
+                    //     peers: ['perr0.gov.tendersys.com'],
+                    //     fcn: 'queryTender'
+                    // };
+                    // blockchain.mainQueryChaincode(payload)
+                    // .then(blockchain_res => {
+                    //     if(blockchain_res.success) {
+                    //         res.statusCode = 200;
+                    //         res.setHeader("Content-Type", "application/json");
+                    //         res.json(blockchain_res);
+                    //     }
+                    //     else {
+                    //         res.status(500).json(blockchain_res);
+                    //     }
+                    // })
+                    res.status(200).json(tender);
+                }
+                else {
+                    res.status(404).json({error: 'Tender Not Found'})
+                }
             }
         )
         .catch(err => res.status(404).json({error: 'Tender Not Found'}))
+    // ===========================================================================
+
+    // ======================= For Testing ======================================= 
+    // Tender.findById(req.params.tenderId)
+    //     .then(
+    //         tender => {
+    //         res.statusCode = 200;
+    //         res.setHeader("Content-Type", "application/json");
+    //         res.json(tender);
+    //         }
+    //     )
+    //     .catch(err => res.status(500).json({error: 'Something went wrong, please try again!'}));
     // ===========================================================================
 })
 
@@ -115,10 +163,11 @@ tenderRouter.post('/', cors.corsWithOptions, authenticate.verifyGov, (req, res) 
     }
     if(req.body.documents) payload.documents = req.body.documents;
     // =============================================================================
-
+    console.log(payload);
     Tender.find({tenderKey: req.body.tenderKey})
         .then(tender => {
-            if(tender) {
+            if(tender.length !== 0) {
+                console.log('hello');
                 res.status(500).json('Tender key already in use!!');
                 return;
             } 
@@ -126,41 +175,42 @@ tenderRouter.post('/', cors.corsWithOptions, authenticate.verifyGov, (req, res) 
                 Tender.create(payload)
                     .then(tender => {
                         // ============== create payload ============================
-                        var payloadForBlockchain = {
-                            fcn: "createTender",
-                            peers: ["peer0.bidder.tendersys.com", "peer0.gov.tendersys.com"],
-                            chaincodeName: "tendersys",
-                            channelName: "bidchannel",
-                            args: [
-                                tender._id,
-                                req.body.tenderKey,
-                                req.body.title, 
-                                "tender",
-                                req.user.orgName,
-                                req.body.workDescription,
-                                req.body.location,
-                                // TODO add more fields
-                            ]
-                        }
+                        // var payloadForBlockchain = {
+                        //     fcn: "createTender",
+                        //     peers: ["peer0.bidder.tendersys.com", "peer0.gov.tendersys.com"],
+                        //     chaincodeName: "tendersys",
+                        //     channelName: "bidchannel",
+                        //     args: [
+                        //         tender._id,
+                        //         req.body.tenderKey,
+                        //         req.body.title, 
+                        //         "tender",
+                        //         req.user.orgName,
+                        //         req.body.workDescription,
+                        //         req.body.location,
+                        //         // TODO add more fields
+                        //     ]
+                        // }
                         // ==========================================================
                         console.log(tender);
                         // ================== Blockchain func >>>> mainInvokeChaincode ================
-                        blockchain.mainInvokeChaincode(payloadForBlockchain)
-                            .then(response => {
-                                console.log(response);
-                                if(response.success){
-                                    res.status(200).json({blockchain_res:{...response}, tender});
-                                }else {
-                                    tender.remove()
-                                        .then(() => {
-                                            res.status(500).json({
-                                                blockchain_res: {...response},
-                                                error: 'Tender not added'
-                                            });
-                                        })
-                                }
-                            })
+                        // blockchain.mainInvokeChaincode(payloadForBlockchain)
+                        //     .then(response => {
+                        //         console.log(response);
+                        //         if(response.success){
+                        //             res.status(200).json({blockchain_res:{...response}});
+                        //         }else {
+                        //             tender.remove()
+                        //                 .then(() => {
+                        //                     res.status(500).json({
+                        //                         blockchain_res: {...response},
+                        //                         error: 'Tender not added'
+                        //                     });
+                        //                 })
+                        //         }
+                        //     })
                         // ============================================================================
+                        res.status(200).json(tender);
                     })
             }
         })
@@ -173,23 +223,21 @@ tenderRouter.put('/:tenderId/addWinnerBidder', cors.corsWithOptions, authenticat
         return;
     }
     Tender.findById(req.params.tenderId)
-        then(tender => {
+        .then(tender => {
             if(tender) {
-                if(tender.host === req.user._id) {
-                    AppliedBidder.find({
-                        tender: req.params.tenderId,
-                        winnerBidder: req.body.winnerBidder
-                    })
+                if(tender.host.toString() === req.user._id.toString()) {
+                    AppliedBidder.findById(req.body.winnerBidderId)
                     .then(appliedBid => {
+                        console.log(appliedBid);
                         if(appliedBid) {
                             // ================= Blockchain Func >>> mainInvokeChaincode =============
 
                             // =======================================================================
 
-                            tender.winnerBidder = req.body.winnerBidderId;
+                            tender.winnerBidder = appliedBid._id;
                             tender.save()
                                 .then(tender => {
-                                    res.status(200).json(tender.populate('winnerBidder'));
+                                    res.status(200).json(tender);
                                 })
                         }
                         else{
@@ -213,7 +261,8 @@ tenderRouter.put('/:tenderId/addWinnerBidder', cors.corsWithOptions, authenticat
 tenderRouter.post('/:tenderId/applyBid', cors.corsWithOptions, authenticate.verifyBidder, (req, res) => {
     Tender.findById(req.params.tenderId)
         .then(tender => {
-            if(tender && tender.status === 'Open') {
+            console.log(tender);
+            if(tender && tender.status === 'open') {
                 if(req.body.bidDetails && req.body.quotation) {
                     var payload = {
                         tender: req.params.tenderId,
@@ -224,7 +273,7 @@ tenderRouter.post('/:tenderId/applyBid', cors.corsWithOptions, authenticate.veri
                     if(req.body.SupportingDocuments) payload.SupportingDocuments = req.body.SupportingDocuments;
                     AppliedBidder.create(payload)
                         .then(appliedTender => {
-                            res.status(200).json(appliedTender.populate('tender').populate('bidder'))
+                            res.status(200).json(appliedTender)
                         })
                 }
                 else {

@@ -17,7 +17,7 @@ var util = require('util');
 var helper = require('./helper.js');
 var logger = helper.getLogger('Query');
 
-var queryChaincode = async function (peer, channelName, chaincodeName, args, fcn, username, org_name) {
+var queryChaincode = async function (peer, channelName, chaincodeName, args, fcn) {
 	try {
 		// first setup the client for this org
 		// var client = await helper.getClientForOrg(org_name, username);

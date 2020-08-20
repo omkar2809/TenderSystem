@@ -15,12 +15,11 @@ function getErrorMessage(field) {
 }
 
 function validatePayload(payload) {
-    if (!payload.username) return getErrorMessage('\'username\'');
-    if (!payload.orgName) return getErrorMessage('\'orgName\'');
 	if (!payload.chaincodeName) return getErrorMessage('\'chaincodeName\'');
 	if (!payload.channelName) return getErrorMessage('\'channelName\'');
 	if (!payload.fcn) return getErrorMessage('\'fcn\'');
-    if (!payload.args) return getErrorMessage('\'args\'');
+	if (!payload.args) return getErrorMessage('\'args\'');
+	if (!payload.peers) return getErrorMessage('\'peers\'');
     return {success: true};
 }
 
@@ -44,7 +43,10 @@ exports.mainBlockchainUser = async (username, orgName) => {
 
 exports.mainInvokeChaincode = async (payload) => {
     try {
-        logger.debug('==================== INVOKE ON CHAINCODE ==================');
+		logger.debug('==================== INVOKE ON CHAINCODE ==================');
+		
+		if (!payload.username) return getErrorMessage('\'username\'');
+		if (!payload.orgName) return getErrorMessage('\'orgName\'');
         
         var result = validatePayload(payload);
         if(!result.success) return result;
@@ -88,8 +90,8 @@ exports.mainQueryChaincode = async (payload) => {
 	var result = validatePayload(payload);
 	if(!result.success) return result;
 	
-	logger.debug('User name : ' + payload.username);
-	logger.debug('Org name  : ' + payload.orgName);
+	// logger.debug('User name : ' + payload.username);
+	// logger.debug('Org name  : ' + payload.orgName);
     logger.debug('channelName  : ' + payload.channelName);
     logger.debug('chaincodeName : ' + payload.chaincodeName);
     logger.debug('fcn  : ' + payload.fcn);
@@ -99,7 +101,7 @@ exports.mainQueryChaincode = async (payload) => {
 	args = JSON.parse(args);
 	logger.debug(args);
 
-	let message = await query.queryChaincode(peer, channelName, chaincodeName, args, fcn, username, orgName);
+	let message = await query.queryChaincode(payload.peers, payload.channelName, payload.chaincodeName, payload.args, payload.fcn);
 	return message;
 }
 
