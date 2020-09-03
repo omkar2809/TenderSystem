@@ -167,7 +167,6 @@ tenderRouter.post('/', cors.corsWithOptions, authenticate.verifyGov, (req, res) 
     Tender.find({tenderKey: req.body.tenderKey})
         .then(tender => {
             if(tender.length !== 0) {
-                console.log('hello');
                 res.status(500).json('Tender key already in use!!');
                 return;
             } 
@@ -273,7 +272,10 @@ tenderRouter.post('/:tenderId/applyBid', cors.corsWithOptions, authenticate.veri
                     if(req.body.SupportingDocuments) payload.SupportingDocuments = req.body.SupportingDocuments;
                     AppliedBidder.create(payload)
                         .then(appliedTender => {
-                            res.status(200).json(appliedTender)
+                            tender.bidCount += 1;
+                            tender.save()
+                            .then(updatedTender => console.log(updatedTender))
+                            res.status(200).json(appliedTender);
                         })
                 }
                 else {

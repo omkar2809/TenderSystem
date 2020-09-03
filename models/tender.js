@@ -42,11 +42,14 @@ const tenderSchema = new Schema({
             default: 'NA'
         }
     }],
-    // appliedBidders: [ AppliedBidderSchema ],
     winnerBidder: { 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'AppliedBidder'
     },
+    bidCount: {
+        type: Number,
+        default: 0
+    }
     // reports: [ ReportSchema ]
 }, {
     timestamps: true
