@@ -1,0 +1,15 @@
+@baseURL = https://localhost:3443
+@tenderID = 5f3e53abf372f044d03b8c3a
+@hostID = 5f3e50d262a7594ce42574a1
+# Get all tenders
+GET {{baseURL}}/tender HTTP/1.1
+
+###
+# get tender details by Id
+GET {{baseURL}}/tender/{{tenderID}} HTTP/1.1
+
+###
+# get all tenders of Gov user
+GET {{baseURL}}/tender/host/{{hostID}}  HTTP/1.1
+
+###

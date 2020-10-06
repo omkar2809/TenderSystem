@@ -215,6 +215,7 @@ tenderRouter.post('/', cors.corsWithOptions, authenticate.verifyGov, (req, res) 
         })
         .catch(err => res.status(500).json({error: 'Something went Wrong!!!'}));
 })
+
 // invoke tender
 tenderRouter.put('/:tenderId/addWinnerBidder', cors.corsWithOptions, authenticate.verifyGov, (req, res) => {
     if(!req.body.winnerBidderId) {
@@ -287,6 +288,26 @@ tenderRouter.post('/:tenderId/applyBid', cors.corsWithOptions, authenticate.veri
             }
         })
         .catch(err => res.status(404).json({error: 'Tender not found'}));
+})
+
+tenderRouter.get('/:tenderId/getBidders', cors.corsWithOptions, authenticate.verifyGov, (req, res) => {
+    Tender.findById(req.params.tenderId)
+        .then(tender => {
+            if(tender) {
+                if(tender.host.toString() === req.user._id.toString()) {
+                    AppliedBidder.find({tender: req.params.tenderId})
+                        .then(biddersArr => {
+                            if(biddersArr.length === 0) res.status(200).json('No Bids');
+                            else res.status(200).json(biddersArr);
+                        })
+                } else {
+                    res.status(403).json('You are not authorized')
+                }
+            } else {
+                res.status(404).json('Tender not found')
+            }
+        })
+        .catch(err => res.status(500).json('Something went wrong!!! Please try again'))
 })
 
 module.exports = tenderRouter;

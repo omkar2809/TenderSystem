@@ -1,0 +1,49 @@
+@baseUrl = https://localhost:3443
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjdiMmU4ZmZiNzI0MzAyZTBmNTY3OTciLCJpYXQiOjE2MDE5MTMzNjksImV4cCI6MTYwMTkyMDU2OX0.dbCSfMeQMR8F037rf-7ad2SSuW8BEI_64cfPQ_tW15k
+
+# get all users
+GET https://localhost:3443/users
+
+###
+# Add new user
+POST {{baseUrl}}/users/signup HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "Bidder05",
+    "email": "bidder5@email.com",
+    "password": "12345678",
+    "orgName": "bidders5",
+    "orgDescription": "ExampleDescription",
+    "role": "Bidder"
+}
+###
+# login user
+POST {{baseUrl}}/users/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "Bidder03",
+    "password": "12345678"
+}
+
+###
+# Logout user
+GET {{baseUrl}}/users/logout HTTP/1.1
+
+###
+# get my Profile data
+GET {{baseUrl}}/users/myProfile HTTP/1.1
+Authorization: {{token}}
+
+###
+# edit my data
+PUT {{baseUrl}}/users/editProfile HTTP/1.1
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+    "orgDescription": "UpdatedDescription"
+}
+
+###
